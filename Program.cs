@@ -47,7 +47,7 @@ namespace PacketMonitor
                 var elapsedTime = (DateTime.Now - startTime).TotalSeconds;
 
                 // Placeholder for error information
-                string errorInfo = ""; // Replace with actual error checking logic if needed
+                string sizeCategory = CategorizePacketSize(dataSize); // Replace with actual error checking logic if needed
 
                 // Create a new packet info entry
                 var packetInfo = new PacketInfo
@@ -56,7 +56,7 @@ namespace PacketMonitor
                     ReceiverMAC = receiverMac,
                     DataSize = dataSize,
                     TimeElapsed = Math.Round(elapsedTime, 2),
-                    Errors = errorInfo
+                    SizeCategory = sizeCategory
                 };
 
                 // Add packet info to the list
@@ -65,15 +65,29 @@ namespace PacketMonitor
             }
         }
 
+        private static string CategorizePacketSize(int size)
+        {
+            // Define size thresholds (in bytes)
+            const int smallThreshold = 64;  // Small packet size threshold
+            const int bigThreshold = 1500;   // Big packet size threshold
+
+            if (size < smallThreshold)
+                return "Small";
+            else if (size > bigThreshold)
+                return "Big";
+            else
+                return "Normal";
+        }
+
         private static void PrintPacketInfo(PacketInfo packetInfo)
         {
             Console.Clear(); // Clear console for fresh output
-            Console.WriteLine("Sender MAC Address | Receiver MAC Address | Data Size (bytes) | Time Elapsed (s) | Errors/Buffer Region");
+            Console.WriteLine("Sender MAC Address | Receiver MAC Address | Data Size (bytes) | Time Elapsed (s) | Category");
             Console.WriteLine(new string('-', 100));
 
             foreach (var info in packetInfos)
             {
-                Console.WriteLine($"{info.SenderMAC,-20} | {info.ReceiverMAC,-20} | {info.DataSize,-18} | {info.TimeElapsed,-16} | {info.Errors}");
+                Console.WriteLine($"{info.SenderMAC,-20} | {info.ReceiverMAC,-20} | {info.DataSize,-18} | {info.TimeElapsed,-16} | {info.SizeCategory}");
             }
         }
     }
@@ -84,6 +98,6 @@ namespace PacketMonitor
         public string ReceiverMAC { get; set; }
         public int DataSize { get; set; }
         public double TimeElapsed { get; set; }
-        public string Errors { get; set; }
+        public string SizeCategory { get; set; }
     }
 }
