@@ -7,8 +7,6 @@ A simple C# console application for monitoring network packets in real time. Thi
 - [Features](#features)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-- [Usage](#usage)
-- [Example Output](#example-output)
 - [License](#license)
 
 ## Features
