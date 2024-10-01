@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 using PcapDotNet.Core;
 using PcapDotNet.Packets;
 
@@ -44,10 +45,18 @@ namespace PacketMonitor
                 var senderMac = ethernetPacket.Source.ToString();
                 var receiverMac = ethernetPacket.Destination.ToString();
                 var dataSize = packet.Length;
-                var elapsedTime = (DateTime.Now - startTime).TotalSeconds;
 
-                // Placeholder for error information
-                string sizeCategory = CategorizePacketSize(dataSize); // Replace with actual error checking logic if needed
+                // Extract sender IP address
+                var senderIp = ethernetPacket.Source.ToString();
+
+                // Measure ping to the sender's IP
+                long pingTime = PingNetwork(senderIp);
+
+                // Convert ping time from ms to µs
+                long pingTimeMicroseconds = pingTime >= 0 ? pingTime * 1000 : -1;
+
+                // Categorize packet size
+                string sizeCategory = CategorizePacketSize(dataSize);
 
                 // Create a new packet info entry
                 var packetInfo = new PacketInfo
@@ -55,7 +64,7 @@ namespace PacketMonitor
                     SenderMAC = senderMac,
                     ReceiverMAC = receiverMac,
                     DataSize = dataSize,
-                    TimeElapsed = Math.Round(elapsedTime, 2),
+                    PingTime = pingTimeMicroseconds,
                     SizeCategory = sizeCategory
                 };
 
@@ -79,15 +88,34 @@ namespace PacketMonitor
                 return "Normal";
         }
 
+        private static long PingNetwork(string ipAddress)
+        {
+            if (string.IsNullOrEmpty(ipAddress))
+                return -1; // Return -1 if IP address is null or empty
+
+            using (var ping = new Ping())
+            {
+                try
+                {
+                    var reply = ping.Send(ipAddress);
+                    return reply.RoundtripTime; // Return the ping time in milliseconds
+                }
+                catch (Exception)
+                {
+                    return -1; // Return -1 if the ping fails
+                }
+            }
+        }
+
         private static void PrintPacketInfo(PacketInfo packetInfo)
         {
             Console.Clear(); // Clear console for fresh output
-            Console.WriteLine("Sender MAC Address | Receiver MAC Address | Data Size (bytes) | Time Elapsed (s) | Category");
+            Console.WriteLine("Sender MAC Address | Receiver MAC Address | Data Size (bytes) | Ping Time (µs) | Category");
             Console.WriteLine(new string('-', 100));
 
             foreach (var info in packetInfos)
             {
-                Console.WriteLine($"{info.SenderMAC,-20} | {info.ReceiverMAC,-20} | {info.DataSize,-18} | {info.TimeElapsed,-16} | {info.SizeCategory}");
+                Console.WriteLine($"{info.SenderMAC,-20} | {info.ReceiverMAC,-20} | {info.DataSize,-18} | {info.PingTime,-14} | {info.SizeCategory}");
             }
         }
     }
@@ -97,7 +125,7 @@ namespace PacketMonitor
         public string SenderMAC { get; set; }
         public string ReceiverMAC { get; set; }
         public int DataSize { get; set; }
-        public double TimeElapsed { get; set; }
+        public long PingTime { get; set; } // Updated to represent microseconds
         public string SizeCategory { get; set; }
     }
 }
