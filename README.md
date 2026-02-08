@@ -1,26 +1,33 @@
 # Pticks
 
-A simple C# console application for monitoring network packets in real time. This application captures packets on a specified network interface and displays relevant information, including MAC addresses, packet size, and elapsed time.
+A small C# console app that shows live IPv4 network traffic from a selected network adapter.
 
-## Table of Contents
+> Use only on networks/devices you own or have permission to monitor.
 
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [License](#license)
+---
 
-## Features
+## What it does
+- Lets you pick a network adapter
+- Captures IPv4 packets in real time
+- Displays a live table of recent packets:
+  - time, IN/OUT direction, protocol (TCP/UDP/ICMP), IPs/ports, packet size, ping (if available)
+- Tracks simple stats (total packets/bytes + top talkers)
 
-- Captures network packets from the first available network device.
-- Displays a summary of packet information in a tabular format.
-- Shows sender and receiver MAC addresses, data size, time elapsed, and any errors (if implemented).
-- Real-time monitoring of network activity.
+---
 
-## Prerequisites
+## Requirements
+- .NET 6+  
+- NuGet packages:
+  - `SharpPcap`
+  - `PacketDotNet`
+- Windows: install **Npcap** (recommended)
 
-Before you begin, ensure you have the following installed:
+---
 
-- [.NET SDK](https://dotnet.microsoft.com/download) (version 5.0 or later)
-- [Visual Studio](https://visualstudio.microsoft.com/) or any C# compatible IDE
-- [Pcap.Net library](https://pcapdotnet.github.io/) for packet capturing
-
+## Install & Run
+```bash
+dotnet new console -n PacketMonitorAdvanced
+cd PacketMonitorAdvanced
+dotnet add package SharpPcap
+dotnet add package PacketDotNet
+dotnet run
